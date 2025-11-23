@@ -57,7 +57,7 @@ struct SignUpView: View {
                 .padding(.horizontal)
                 
                 // MARK: - Separator
-                separator(circleColor: secundaryColor, isLoading: apiService.isLoading)
+                separator(circleColor: secundaryColor, isLoading: false)
                     .padding(.vertical, 10)
                 
                 // MARK: Create new account
@@ -88,7 +88,7 @@ struct SignUpView: View {
         VStack {
             Button(action: {
                 self.onClickRequest = true
-                apiService.signUp(user: User(username: username, password: password, email: newMail))
+                // apiService.signUp(user: User(username: username, password: password, email: newMail))
             }) {
                 Text("Create new account")
                     .font(.headline)
@@ -99,28 +99,7 @@ struct SignUpView: View {
                     .cornerRadius(10)
             }
             .padding(.horizontal)               // 🔥 margine dai bordi
-            .disabled(apiService.isLoading)
-            
-            if apiService.isLoading {
-                ProgressView("Invio dati...")
-            }
-            
-            if let error = apiService.errorMessage {
-                if apiService.isError {
-                    Text("Errore: \(error)")
-                        .foregroundColor(.red)
-                }
-            }
-            
-            if self.onClickRequest && !apiService.isLoading && !apiService.isError {
-                Text("Login effettuato con successo!")
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundColor(.white)
-                    .onAppear(perform: {
-                        // Torna alla login
-                        showRegister = false   // 👈 Ritorna indietro
-                    })
-            }
+            .disabled(false)            
         }
     }
     
