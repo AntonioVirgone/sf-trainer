@@ -36,6 +36,7 @@ struct LoginView: View {
                         HStack {
                             Image(systemName: "person.fill")
                             TextField("Username", text: $username)
+                                .textInputAutocapitalization(.never)
                         }
                         .padding()
                         .background(Color(.secondarySystemBackground))
