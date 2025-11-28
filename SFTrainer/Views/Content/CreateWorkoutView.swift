@@ -43,6 +43,7 @@ struct CreateWorkoutView: View {
                     .disabled(name.isEmpty || selectedPlanIds.isEmpty)
                 }
             }
+            .background(backgroundGradient)        // 🔥 Funziona
             .navigationTitle("Nuovo Workout")
             .task { loadPlans() }
             .alert("Workout creato!", isPresented: $saveSuccess) {

@@ -19,9 +19,7 @@ class ExerciseLocalService {
     }
     
     func getAll() -> [Exercise] {
-        let ex = LocalDatabase.shared.exercises
-        print(ex)
-        return ex
+        LocalDatabase.shared.exercises
     }
 }
 

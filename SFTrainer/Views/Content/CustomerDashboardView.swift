@@ -18,8 +18,10 @@ struct CustomerDashboardView: View {
         } detail: {
             if let customer = selectedCustomer {
                 CustomerDetailPanel(customer: customer)
+                    .background(backgroundGradient)     // 🔥 Sidebar con background
             } else {
                 EmptyDetailPlaceholder()
+                    .background(backgroundGradient)     // 🔥 Sidebar con background
             }
         }
         .background(backgroundGradient)        // 🔥 Funziona
@@ -189,6 +191,5 @@ struct EmptyDetailPlaceholder: View {
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
     }
 }

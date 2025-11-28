@@ -15,11 +15,7 @@ struct CreatePlanView: View {
     @State private var selectedExerciseId: String = ""   // mai optional
     
     @State private var workoutExercises: [PlanExerciseRequest] = []
-    
-    @State private var sets = 3
-    @State private var reps = 10
-    @State private var recovery = 60
-    
+        
     @State private var saveSuccess = false
     
     var body: some View {
@@ -30,15 +26,15 @@ struct CreatePlanView: View {
                 }
                 
                 Section("Aggiungi esercizio") {
-                    Picker("Esercizio", selection: $selectedExerciseId) {
-                        ForEach(allExercises) { ex in
-                            Text(ex.name).tag(ex.id)
-                        }
+                    if allExercises.isEmpty {
+                        Text("Nessun esercizio disponibile")
+                    } else {
+                        ExerciseCircleGrid(
+                            exercises: allExercises,
+                            selectedId: $selectedExerciseId
+                        )
+                        .padding(.vertical)
                     }
-                    
-                    Stepper("Set: \(sets)", value: $sets, in: 1...10)
-                    Stepper("Ripetizioni: \(reps)", value: $reps, in: 1...50)
-                    Stepper("Recupero (sec): \(recovery)", value: $recovery, in: 10...300)
                     
                     Button("Aggiungi al plan") {
                         addExerciseToPlan()
@@ -67,6 +63,7 @@ struct CreatePlanView: View {
                     .disabled(name.isEmpty || workoutExercises.isEmpty)
                 }
             }
+            .background(backgroundGradient)        // 🔥 Funziona
             .navigationTitle("Nuovo Plan")
             .task {
                 loadExercises()
@@ -96,9 +93,9 @@ struct CreatePlanView: View {
         
         let new = PlanExerciseRequest(
             exerciseId: selectedExerciseId,
-            sets: sets,
-            repetitions: reps,
-            recovery: recovery
+            sets: 0,
+            repetitions: 0,
+            recovery: 0
         )
         
         workoutExercises.append(new)
@@ -127,8 +124,5 @@ struct CreatePlanView: View {
     private func reset() {
         name = ""
         workoutExercises = []
-        sets = 3
-        reps = 10
-        recovery = 60
     }
 }
