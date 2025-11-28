@@ -26,13 +26,13 @@ struct ContentView: View {
             // 🔹 Sfondo gradiente
             backgroundGradient
             
-            if userApiService.isLoggedIn {
-                ClientsListView()
+//            if userApiService.isLoggedIn {
+            TrainerMainView()
                     .environmentObject(userApiService)
-            } else {
-                AuthView()
-                    .environmentObject(userApiService)
-            }
+//            } else {
+//                AuthView()
+//                    .environmentObject(userApiService)
+//            }
         }
     }
 }
