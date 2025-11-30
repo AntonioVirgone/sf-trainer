@@ -15,67 +15,145 @@ struct CreatePlanView: View {
     @State private var selectedExerciseId: String = ""   // mai optional
     
     @State private var workoutExercises: [PlanExerciseRequest] = []
-        
+    
     @State private var saveSuccess = false
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Nome del plan") {
-                    TextField("Giorno 1", text: $name)
-                }
+            doubleColumn
+        }
+    }
+    
+    // MARK: - Vista principale con due colonne + bottone fisso
+    private var doubleColumn: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .bottomLeading) {
                 
-                Section("Aggiungi esercizio") {
-                    if allExercises.isEmpty {
-                        Text("Nessun esercizio disponibile")
-                    } else {
-                        ExerciseCircleGrid(
-                            exercises: allExercises,
-                            selectedId: $selectedExerciseId
-                        )
-                        .padding(.vertical)
-                    }
-                    
-                    Button("Aggiungi al plan") {
-                        addExerciseToPlan()
-                    }
-                    .disabled(selectedExerciseId.isEmpty)
+                HStack(alignment: .top, spacing: 24) {
+
+                    // COLONNA SINISTRA (prioritaria)
+                    leftColumn
+                        .layoutPriority(1)
+                        .frame(maxWidth: geo.size.width * 0.7, alignment: .topLeading)
+
+                    // COLONNA DESTRA (meno prioritaria)
+                    rightColumn
+                        .frame(maxWidth: geo.size.width * 0.3, alignment: .topLeading)
+                        .padding(.trailing, 32)
                 }
+                .padding(.horizontal, 24)
                 
-                Section("Esercizi nel plan") {
-                    ForEach(workoutExercises) { item in
-                        let exName = allExercises.first(where: { $0.id == item.exerciseId })?.name ?? "?"
-                        
-                        HStack {
-                            Text(exName)
-                            Spacer()
-                            Text("\(item.sets)x\(item.repetitions)")
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .onDelete(perform: deleteExercise)
+                // Pulsante fisso
+                Button(action: {
+                    Task { await savePlan() }
+                }) {
+                    Text("Salva Plan")
+                        .font(.headline)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(name.isEmpty || workoutExercises.isEmpty ? Color.gray : Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .shadow(radius: 4)
                 }
-                
-                Section {
-                    Button("Salva Plan") {
-                        Task { await savePlan() }
-                    }
-                    .disabled(name.isEmpty || workoutExercises.isEmpty)
-                }
+                .disabled(name.isEmpty || workoutExercises.isEmpty)
+                .padding()
             }
-            .background(backgroundGradient)        // 🔥 Funziona
+            .background(backgroundGradient)
             .navigationTitle("Nuovo Plan")
-            .task {
-                loadExercises()
-            }
+            .task { loadExercises() }
             .alert("Plan salvato!", isPresented: $saveSuccess) {
                 Button("OK") {}
             }
         }
     }
     
-    // MARK: Funzioni
+    private var leftColumn: some View {
+        VStack {
+            // Nome del plan
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Nome del plan")
+                    .font(.title2)
+                    .foregroundColor(.white.opacity(0.8))
+                
+                TextField("Giorno 1", text: $name)
+                    .textFieldStyle(.roundedBorder)
+            }
+            
+            // Cerchi esercizi
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Aggiungi esercizio")
+                    .font(.title2)
+                    .foregroundColor(.white.opacity(0.8))
+                
+                if allExercises.isEmpty {
+                    Text("Nessun esercizio disponibile")
+                        .foregroundColor(.white.opacity(0.6))
+                } else {
+                    ExerciseCircleGrid(
+                        exercises: allExercises,
+                        selectedId: $selectedExerciseId
+                    )
+                    .padding(.vertical)
+                }
+                
+                Button("Aggiungi al plan") {
+                    addExerciseToPlan()
+                }
+                .disabled(selectedExerciseId.isEmpty)
+            }
+            
+            Spacer()
+        }
+    }
     
+    private var rightColumn: some View {
+        VStack {
+            Text("Esercizi nel plan")
+                .font(.title2)
+                .foregroundColor(.white.opacity(0.8))
+            
+            if workoutExercises.isEmpty {
+                Text("Nessun esercizio aggiunto")
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.top, 8)
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(workoutExercises) { item in
+                            let exName = allExercises.first(where: { $0.id == item.exerciseId })?.name ?? "?"
+                            
+                            HStack {
+                                Text(exName)
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                                
+                                Text("\(item.sets)x\(item.repetitions)")
+                                    .foregroundColor(.secondary)
+                                
+                                Button {
+                                    deleteExercise(item)
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.white.opacity(0.1))
+                            )
+                        }
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+    }
+    
+    // MARK: Funzioni
     private func loadExercises() {
         do {
             //allExercises = try await PlanApiService.shared.getAllExercises()
@@ -101,8 +179,8 @@ struct CreatePlanView: View {
         workoutExercises.append(new)
     }
     
-    private func deleteExercise(at offsets: IndexSet) {
-        workoutExercises.remove(atOffsets: offsets)
+    private func deleteExercise(_ item: PlanExerciseRequest) {
+        workoutExercises.removeAll { $0.id == item.id }
     }
     
     private func savePlan() async {
