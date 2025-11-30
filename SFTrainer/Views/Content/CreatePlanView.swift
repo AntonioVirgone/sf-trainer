@@ -121,34 +121,27 @@ struct CreatePlanView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(workoutExercises) { item in
-                            let exName = allExercises.first(where: { $0.id == item.exerciseId })?.name ?? "?"
-                            
-                            HStack {
-                                Text(exName)
-                                    .foregroundColor(.white)
-                                
-                                Spacer()
-                                
-                                Text("\(item.sets)x\(item.repetitions)")
-                                    .foregroundColor(.secondary)
-                                
-                                Button {
-                                    deleteExercise(item)
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
+                            if let ex = allExercises.first(where: { $0.id == item.exerciseId }) {
+                                HStack {
+                                    ExerciseCardView(exercise: ex, exercises: allExercises, width: 35.0, height: 35.0, imageSize: 13.0, selectedId:. constant(item.exerciseId))
+                                    Spacer()
+                                    Button {
+                                        deleteExercise(item)
+                                    } label: {
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
+                                            .padding(.trailing, 10)
+                                    }
                                 }
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color.white.opacity(0.1))
+                                )
                             }
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white.opacity(0.1))
-                            )
                         }
                     }
                 }
             }
-            
             Spacer()
         }
     }
