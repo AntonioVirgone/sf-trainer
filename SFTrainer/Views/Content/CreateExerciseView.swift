@@ -12,7 +12,7 @@ struct CreateExerciseView: View {
     @State private var name = ""
     @State private var description = ""
     @State private var imageName = ""
-    @State private var muscleGroup = ""
+    @State private var muscleGroup = MuscleGroupType.gambe
     @State private var sets = 0
     @State private var repetitions = 0
     @State private var recovery = 0
@@ -29,7 +29,13 @@ struct CreateExerciseView: View {
                     TextField("Nome", text: $name)
                     TextField("Descrizione", text: $description)
                     TextField("Nome immagine", text: $imageName)
-                    TextField("Gruppo muscolare", text: $muscleGroup)
+                    Section("Gruppo Muscolare") {
+                        Picker("Seleziona gruppo", selection: $muscleGroup) {
+                            ForEach(MuscleGroupType.allCases) { group in
+                                Text(group.rawValue).tag(group)
+                            }
+                        }
+                    }
                 }
                 
                 Section("Parametri base") {
@@ -101,7 +107,7 @@ struct CreateExerciseView: View {
         name = ""
         description = ""
         imageName = ""
-        muscleGroup = ""
+        MuscleGroupType.braccia
         sets = 0
         repetitions = 0
         recovery = 0
