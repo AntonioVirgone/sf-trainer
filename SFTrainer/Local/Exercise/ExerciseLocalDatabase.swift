@@ -7,8 +7,8 @@
 
 import Foundation
 
-class LocalDatabase {
-    static let shared = LocalDatabase()
+class ExerciseLocalDatabase {
+    static let shared = ExerciseLocalDatabase()
     
     private let key = "smartfit_local_db"
     

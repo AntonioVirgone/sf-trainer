@@ -20,50 +20,50 @@ struct CreatePlanView: View {
     
     var body: some View {
         NavigationStack {
-            doubleColumn
-        }
-    }
-    
-    // MARK: - Vista principale con due colonne + bottone fisso
-    private var doubleColumn: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .bottomLeading) {
-                
-                HStack(alignment: .top, spacing: 24) {
+            // MARK: - Vista principale con due colonne + bottone fisso
+            GeometryReader { geo in
+                ZStack(alignment: .bottomLeading) {
+                    
+                    HStack(alignment: .top, spacing: 24) {
 
-                    // COLONNA SINISTRA (prioritaria)
-                    leftColumn
-                        .layoutPriority(1)
-                        .frame(maxWidth: geo.size.width * 0.7, alignment: .topLeading)
+                        // COLONNA SINISTRA (prioritaria)
+                        leftColumn
+                            .layoutPriority(1)
+                            .frame(maxWidth: geo.size.width * 0.7, alignment: .topLeading)
 
-                    // COLONNA DESTRA (meno prioritaria)
-                    rightColumn
-                        .frame(maxWidth: geo.size.width * 0.3, alignment: .topLeading)
-                        .padding(.trailing, 32)
+                        // COLONNA DESTRA (meno prioritaria)
+                        rightColumn
+                            .frame(maxWidth: geo.size.width * 0.3, alignment: .topLeading)
+                            .padding(.trailing, 32)
+                    }
+                    .padding(.horizontal, 24)
+                    
+                    // Pulsante fisso
+                    Button(action: {
+                        Task { await savePlan() }
+                    }) {
+                        Text("Salva Plan")
+                            .font(.headline)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 12)
+                            .background(name.isEmpty || workoutExercises.isEmpty ? Color.gray : Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 4)
+                    }
+                    .disabled(name.isEmpty || workoutExercises.isEmpty)
+                    .padding()
                 }
-                .padding(.horizontal, 24)
-                
-                // Pulsante fisso
-                Button(action: {
-                    Task { await savePlan() }
-                }) {
-                    Text("Salva Plan")
-                        .font(.headline)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(name.isEmpty || workoutExercises.isEmpty ? Color.gray : Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .shadow(radius: 4)
+                .background(backgroundGradient)
+                .background(backgroundGradient)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarBackground(Color.clear, for: .navigationBar)
+                .toolbarColorScheme(.dark, for: .navigationBar)
+                .navigationTitle("Nuovo Plan")
+                .task { loadExercises() }
+                .alert("Plan salvato!", isPresented: $saveSuccess) {
+                    Button("OK") {}
                 }
-                .disabled(name.isEmpty || workoutExercises.isEmpty)
-                .padding()
-            }
-            .background(backgroundGradient)
-            .navigationTitle("Nuovo Plan")
-            .task { loadExercises() }
-            .alert("Plan salvato!", isPresented: $saveSuccess) {
-                Button("OK") {}
             }
         }
     }
@@ -76,8 +76,12 @@ struct CreatePlanView: View {
                     .font(.title2)
                     .foregroundColor(.white.opacity(0.8))
                 
-                TextField("Giorno 1", text: $name)
-                    .textFieldStyle(.roundedBorder)
+                TextField(
+                    "",
+                    text: $name,
+                    prompt: Text("Giorno 1").foregroundColor(.white.opacity(0.5))
+                )
+                .whiteTextField()
             }
             
             // Cerchi esercizi
@@ -123,7 +127,7 @@ struct CreatePlanView: View {
                         ForEach(workoutExercises) { item in
                             if let ex = allExercises.first(where: { $0.id == item.exerciseId }) {
                                 HStack {
-                                    ExerciseCardView(exercise: ex, exercises: allExercises, width: 35.0, height: 35.0, imageSize: 13.0, selectedId:. constant(item.exerciseId))
+                                    ExerciseCardView(exercise: ex, exercises: allExercises, width: 35.0, height: 35.0, imageSize: 13.0, selectedId: .constant(item.exerciseId))
                                     Spacer()
                                     Button {
                                         deleteExercise(item)

@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct CreateCustomerView: View {
+struct CreateCustomerViewOld: View {
     @State private var name = ""
     @State private var email = ""
 

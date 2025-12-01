@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct CustomerDashboardView: View {
+struct CustomerDashboardViewOld: View {
     @State private var customers: [Customer] = []
     @State private var selectedCustomer: Customer?
     

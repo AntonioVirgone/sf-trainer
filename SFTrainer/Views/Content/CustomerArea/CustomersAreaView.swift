@@ -44,7 +44,7 @@ struct CustomersAreaView: View {
                         }
                         
                         NavigationLink {
-                            CustomerDashboardView()
+                            CustomersDashboardView()
                         } label: {
                             FeatureCard(
                                 title: "Dashboard",

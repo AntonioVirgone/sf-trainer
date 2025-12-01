@@ -29,7 +29,7 @@ struct TrainerMainView: View {
                         Label("Assegna", systemImage: "link")
                     }
                 
-                CustomerDashboardView()
+                CustomersDashboardView()
                     .tabItem {
                         Label("Dashboard", systemImage: "person.text.rectangle")
                     }
