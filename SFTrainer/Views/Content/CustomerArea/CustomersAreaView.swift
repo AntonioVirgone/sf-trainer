@@ -32,17 +32,7 @@ struct CustomersAreaView: View {
                                 systemImage: "person.badge.plus"
                             )
                         }
-                        
-                        NavigationLink {
-                            AssignWorkoutView()
-                        } label: {
-                            FeatureCard(
-                                title: "Assegna workout",
-                                subtitle: "Collega workout ai clienti",
-                                systemImage: "link"
-                            )
-                        }
-                        
+                                                
                         NavigationLink {
                             CustomersDashboardView()
                         } label: {

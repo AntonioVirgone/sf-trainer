@@ -12,96 +12,66 @@ struct CustomersDashboardView: View {
     @State private var customers: [Customer] = []
     @State private var selectedCustomer: Customer? = nil
     @State private var assignedWorkouts: [Workout] = []   // Caricati solo quando selezioni il cliente
-
+    
     @State private var showAssignWorkout = false
+    
+    @StateObject var vm = CustomersViewModel()
 
     var body: some View {
         NavigationStack {
             ZStack {
                 backgroundGradient.ignoresSafeArea()
-
+                
                 HStack(spacing: 0) {
-
+                    
                     // MARK: - COLUMN 1: Customer List
                     customerList
                         .frame(maxWidth: 350)
                         .background(Color.black.opacity(0.22))
-
+                    
                     Divider().background(Color.white.opacity(0.2))
-
+                    
                     // MARK: - COLUMN 2: Customer Detail
                     customerDetail
                         .frame(maxWidth: 400)
                     
                     Divider().background(Color.white.opacity(0.2))
-
+                    
                     // MARK: - COLUMN 3: Assigned Workouts
                     workoutList
                         .frame(maxWidth: .infinity)
                 }
             }
             .navigationTitle("Gestione Clienti")
-            .task { loadCustomers() }
+            .task { await vm.loadCustomers(trainerCode: "aabb") }
         }
     }
-}
-
-extension CustomersDashboardView {
-    var customerList: some View {
+    
+    private var customerList: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Clienti")
                 .font(.title.bold())
                 .foregroundColor(.white)
                 .padding(.top, 24)
                 .padding(.horizontal)
-
+            
             ScrollView {
                 LazyVStack(spacing: 10) {
-                    ForEach(customers) { customer in
+                    ForEach(vm.customers) { customer in
                         CustomerRowDash(customer: customer,
-                                    isSelected: selectedCustomer?.id == customer.id)
-                            .onTapGesture {
-                                selectedCustomer = customer
-                                loadAssignedWorkouts(for: customer)
-                            }
+                                        isSelected: selectedCustomer?.id == customer.id)
+                        .onTapGesture {
+                            selectedCustomer = customer
+                            loadAssignedWorkouts(for: customer)
+                        }
                     }
                 }
                 .padding()
             }
         }
     }
-}
-
-struct CustomerRowDash: View {
-    let customer: Customer
-    let isSelected: Bool
     
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(customer.name)
-                    .foregroundColor(.white)
-                    .font(.headline)
-                Text(customer.email!)
-                    .foregroundColor(.white.opacity(0.7))
-                    .font(.subheadline)
-            }
-            Spacer()
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? Color.green.opacity(0.35) : Color.white.opacity(0.12))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color.green : Color.clear, lineWidth: 2)
-        )
-    }
-}
-
-extension CustomersDashboardView {
-    var customerDetail: some View {
+    private var customerDetail: some View {
         VStack(alignment: .leading, spacing: 24) {
             
             if let c = selectedCustomer {
@@ -110,7 +80,7 @@ extension CustomersDashboardView {
                     .font(.largeTitle.bold())
                     .foregroundColor(.white)
                 
-                Text(c.email!)
+                Text(c.email ?? "")
                     .foregroundColor(.white.opacity(0.7))
                     .font(.title3)
                 
@@ -143,15 +113,42 @@ extension CustomersDashboardView {
         }
         .padding(30)
         .sheet(isPresented: $showAssignWorkout) {
-                if let c = selectedCustomer {
-                    AssignWorkoutSheet(
-                        customer: c,
-                        onAssigned: {
-                            loadAssignedWorkouts(for: c)
-                        }
-                    )
-                }
+            if let c = selectedCustomer {
+                AssignWorkoutSheetView(
+                    customer: c,
+                    onAssigned: {
+                        loadAssignedWorkouts(for: c)
+                    }
+                )
             }
+        }
+    }
+    
+    var workoutList: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            
+            Text("Workout Assegnati")
+                .font(.title2.bold())
+                .foregroundColor(.white)
+                .padding(.top, 20)
+                .padding(.horizontal)
+            
+            if let _ = selectedCustomer {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(assignedWorkouts) { workout in
+                            WorkoutRow(workout: workout)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 30)
+                }
+            } else {
+                Text("Seleziona un cliente per vedere i workout")
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding()
+            }
+        }
     }
     
     func dashboardButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
@@ -169,85 +166,45 @@ extension CustomersDashboardView {
         }
     }
 
+    /*
+    func loadCustomers() {
+        // TODO: API NestJS GET /customers
+        customers = CustomerLocalService.shared.getAll()
+    }
+    */
+    
+    func loadAssignedWorkouts(for customer: Customer) {
+        let ids = AssignedWorkoutLocalStore.shared.getAssignedWorkouts(for: customer.id)
+        assignedWorkouts = WorkoutLocalService.shared.getAll().filter { ids.contains($0.id) }
+    }
+
 }
 
-struct AssignWorkoutSheet: View {
+struct CustomerRowDash: View {
     let customer: Customer
-    let onAssigned: () -> Void
-    
-    @Environment(\.dismiss) var dismiss
-    @State private var workouts: [Workout] = []
+    let isSelected: Bool
     
     var body: some View {
-        ZStack {
-            backgroundGradient.ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 24) {
-                Text("Assegna Workout a \(customer.name)")
-                    .font(.title.bold())
+        HStack {
+            VStack(alignment: .leading) {
+                Text(customer.name)
                     .foregroundColor(.white)
-                    .padding(.top, 20)
-
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(workouts) { workout in
-                            WorkoutRow(workout: workout)
-                                .onTapGesture {
-                                    assign(workout)
-                                }
-                        }
-                    }
-                }
-
-                Spacer()
+                    .font(.headline)
+                Text(customer.email ?? "")
+                    .foregroundColor(.white.opacity(0.7))
+                    .font(.subheadline)
             }
-            .padding(30)
+            Spacer()
         }
-        .task { loadWorkouts() }
-    }
-    
-    private func loadWorkouts() {
-        workouts = WorkoutLocalService.shared.getAll()
-    }
-    
-    private func assign(_ workout: Workout) {
-        AssignedWorkoutLocalStore.shared.assign(
-            workoutId: workout.id,
-            to: customer.id
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isSelected ? Color.green.opacity(0.35) : Color.white.opacity(0.12))
         )
-        
-        onAssigned()   // aggiorna la colonna 3
-        dismiss()
-    }
-}
-
-
-extension CustomersDashboardView {
-    var workoutList: some View {
-        VStack(alignment: .leading, spacing: 20) {
-
-            Text("Workout Assegnati")
-                .font(.title2.bold())
-                .foregroundColor(.white)
-                .padding(.top, 20)
-                .padding(.horizontal)
-
-            if let _ = selectedCustomer {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(assignedWorkouts) { workout in
-                            WorkoutRow(workout: workout)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 30)
-                }
-            } else {
-                Text("Seleziona un cliente per vedere i workout")
-                    .foregroundColor(.white.opacity(0.6))
-                    .padding()
-            }
-        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isSelected ? Color.green : Color.clear, lineWidth: 2)
+        )
     }
 }
 
@@ -270,17 +227,5 @@ struct WorkoutRow: View {
         .padding()
         .background(Color.white.opacity(0.12))
         .cornerRadius(12)
-    }
-}
-
-extension CustomersDashboardView {
-    func loadCustomers() {
-        // TODO: API NestJS GET /customers
-        customers = CustomerLocalService.shared.getAll()
-    }
-    
-    func loadAssignedWorkouts(for customer: Customer) {
-        let ids = AssignedWorkoutLocalStore.shared.getAssignedWorkouts(for: customer.id)
-        assignedWorkouts = WorkoutLocalService.shared.getAll().filter { ids.contains($0.id) }
     }
 }

@@ -10,7 +10,7 @@ import Foundation
 class CustomerLocalDatabase {
     static let shared = CustomerLocalDatabase()
     
-    private let key = "smartfit_local_db"
+    private let key = "customer_local_db"
     
     struct DBModel: Codable {
         var customers: [Customer] = []

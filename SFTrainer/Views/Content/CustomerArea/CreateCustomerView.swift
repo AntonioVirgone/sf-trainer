@@ -9,11 +9,12 @@ import Foundation
 import SwiftUI
 
 struct CreateCustomerView: View {
-    @State private var customers: [Customer] = []      // Lista per colonna sinistra
     @State private var name = ""
     @State private var email = ""
     @State private var showSuccess = false
-    
+
+    @StateObject var vm = CustomersViewModel()
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -30,15 +31,15 @@ struct CreateCustomerView: View {
                             .padding(.top, 24)
                             .padding(.horizontal)
                         
-                        if customers.isEmpty {
+                        if vm.customers.isEmpty {
                             Text("Nessun cliente registrato")
                                 .foregroundColor(.white.opacity(0.6))
                                 .padding()
                         } else {
                             ScrollView {
                                 LazyVStack(spacing: 12) {
-                                    ForEach(customers, id: \.id) { customer in
-                                        CustomerRow(customer: customer)
+                                    ForEach(vm.customers, id: \.id) { customer in
+                                        CustomerRowView(customer: customer)
                                     }
                                 }
                                 .padding(.horizontal)
@@ -114,7 +115,7 @@ struct CreateCustomerView: View {
             }
             .navigationTitle("Gestione Clienti")
             .navigationBarTitleDisplayMode(.inline)
-            .task { loadCustomers() }
+            .task { await vm.loadCustomers(trainerCode: "aabb") }
             .alert("Cliente creato!", isPresented: $showSuccess) {
                 Button("OK") {}
             }
@@ -123,48 +124,21 @@ struct CreateCustomerView: View {
     
     // MARK: - LOGIC
     private func createCustomer() async {
-        let newCustomer = Customer(id: UUID().uuidString, name: name, email: email)
-        
-        customers.append(newCustomer)
-        
-        // TODO: integrazione con API NestJS
-        // try await CustomerApiService.shared.create(name: name, email: email)
-        CustomerLocalService.shared.create(newCustomer)
-        
+        await vm.createCustomer(trainerCode: "aabb", name: name, email: email)
+
         showSuccess = true
         reset()
     }
-    
+
+    /*
     private func loadCustomers() {
         // TODO: Caricare dal backend
         customers = CustomerLocalService.shared.getAll()
     }
+     */
     
     private func reset() {
         name = ""
         email = ""
-    }
-}
-
-struct CustomerRow: View {
-    let customer: Customer
-    
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(customer.name)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                
-                Text(customer.email!)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
-            }
-            
-            Spacer()
-        }
-        .padding()
-        .background(Color.white.opacity(0.12))
-        .cornerRadius(12)
     }
 }

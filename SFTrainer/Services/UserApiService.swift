@@ -32,7 +32,7 @@ class UserApiService: ObservableObject {
         }
         
         do {
-            let result: LoginResponse = try await APIService.shared.request(
+            let result: LoginResponse = try await APIService2.shared.request(
                 "auth/login",
                 method: "POST",
                 body: LoginBody(username: username, password: password)

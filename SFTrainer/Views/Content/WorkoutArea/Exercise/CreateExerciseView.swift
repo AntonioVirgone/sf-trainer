@@ -123,16 +123,26 @@ struct CreateExerciseView: View {
                 .foregroundColor(.white.opacity(0.8))
             
             HStack {
-                TextField("",
-                          text: $newInstruction,
-                          prompt: Text("Nuova istruzione").font(.title2).foregroundColor(.white.opacity(0.5))
+                TextField(
+                    "",
+                    text: $newInstruction,
+                    prompt: Text("Nuova istruzione")
+                        .font(.title2)
+                        .foregroundColor(.white.opacity(0.5))
                 )
                 .whiteTextField()
+                
                 Button("Aggiungi") {
-                    if !newInstruction.isEmpty {
-                        instructions.append(newInstruction)
-                        newInstruction = ""
-                    }
+                    guard !newInstruction.isEmpty else { return }
+                    
+                    // Calcolo del numero progressivo
+                    let nextNumber = instructions.count + 1
+                    
+                    // Aggiungo la stringa numerata
+                    instructions.append("\(nextNumber). \(newInstruction)")
+                    
+                    // Reset
+                    newInstruction = ""
                 }
                 .buttonStyle(.borderedProminent)
             }
