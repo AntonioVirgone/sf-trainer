@@ -8,8 +8,8 @@
 import Foundation
 
 class ApiService {
-//    private let baseUrl = "https://smart-fit-api.onrender.com/api"
-    private let baseUrl = "https://aa17a4be0a8c.ngrok-free.app/api"
+    private let baseUrl = "https://smart-fit-api.onrender.com/api"
+//    private let baseUrl = "https://aa17a4be0a8c.ngrok-free.app/api"
 
     // MARK: -------- GENERIC GET --------
     func get<T: Decodable>(_ path: String) async throws -> T {

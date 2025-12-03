@@ -10,7 +10,6 @@ import SwiftUI
 
 struct TrainerMainView: View {
     @EnvironmentObject var vm: TrainerViewModel
-    @EnvironmentObject var auth: UserApiService   // se già lo usi
     
     var body: some View {
         ZStack {
@@ -36,6 +35,7 @@ struct TrainerMainView: View {
             }
             // colore di selezione tab
             .scrollContentBackground(.hidden)      // se ci sono List / ScrollView
-            .tint(.green)        }
+            .tint(.green)
+        }
     }
 }

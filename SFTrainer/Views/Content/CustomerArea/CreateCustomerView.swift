@@ -14,6 +14,7 @@ struct CreateCustomerView: View {
     @State private var showSuccess = false
 
     @StateObject var vm = CustomersViewModel()
+    @EnvironmentObject var tvm: TrainerViewModel
 
     var body: some View {
         NavigationStack {
@@ -66,12 +67,8 @@ struct CreateCustomerView: View {
                             Text("Nome")
                                 .foregroundColor(.white)
                                 .font(.headline)
-                            
-                            TextField("Mario Rossi", text: $name)
-                                .padding()
-                                .background(Color.white.opacity(0.15))
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
+
+                            SFTextField(placeholder: "Mario Rossi", text: $name)
                         }
                         
                         // Email
@@ -80,13 +77,7 @@ struct CreateCustomerView: View {
                                 .foregroundColor(.white)
                                 .font(.headline)
                             
-                            TextField("email@example.com", text: $email)
-                                .padding()
-                                .background(Color.white.opacity(0.15))
-                                .foregroundColor(.white)
-                                .keyboardType(.emailAddress)
-                                .textInputAutocapitalization(.none)
-                                .cornerRadius(12)
+                            SFTextField(placeholder: "example@domain.com", icon: "envelope.fill", text: $email, keyboardType: .emailAddress)
                         }
                         
                         
@@ -115,7 +106,7 @@ struct CreateCustomerView: View {
             }
             .navigationTitle("Gestione Clienti")
             .navigationBarTitleDisplayMode(.inline)
-            .task { await vm.loadCustomers(trainerCode: "aabb") }
+            .task { await loadCustomers() }
             .alert("Cliente creato!", isPresented: $showSuccess) {
                 Button("OK") {}
             }
@@ -124,19 +115,20 @@ struct CreateCustomerView: View {
     
     // MARK: - LOGIC
     private func createCustomer() async {
-        await vm.createCustomer(trainerCode: "aabb", name: name, email: email)
-
-        showSuccess = true
-        reset()
+        if let trainer = tvm.trainer {
+            await vm.createCustomer(trainerCode: trainer.id!, name: name, email: email)
+            
+            showSuccess = true
+            reset()
+        }
     }
 
-    /*
-    private func loadCustomers() {
-        // TODO: Caricare dal backend
-        customers = CustomerLocalService.shared.getAll()
+    func loadCustomers() async {
+        if let trainer = tvm.trainer {
+            await vm.loadCustomers(trainerCode: trainer.id!)
+        }
     }
-     */
-    
+
     private func reset() {
         name = ""
         email = ""

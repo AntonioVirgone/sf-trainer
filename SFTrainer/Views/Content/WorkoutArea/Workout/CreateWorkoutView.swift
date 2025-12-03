@@ -63,11 +63,7 @@ struct CreateWorkoutView: View {
                                 .font(.headline)
                                 .foregroundColor(.white)
                             
-                            TextField("Scheda forza 3 giorni", text: $name)
-                                .padding()
-                                .background(Color.white.opacity(0.15))
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
+                            SFTextField(placeholder: "Scheda forza 3 giorni", text: $name)
                         }
                         
                         
@@ -118,7 +114,6 @@ struct CreateWorkoutView: View {
             }
         }
     }
-    
     
     // MARK: - LOGICA
     private func toggleSelection(_ id: String) {

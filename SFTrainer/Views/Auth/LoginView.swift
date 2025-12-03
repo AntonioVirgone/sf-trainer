@@ -39,10 +39,8 @@ struct LoginView: View {
 
                     // MARK: - Campi input
                     VStack(spacing: 20) {
-
-                        inputField(icon: "person.fill", placeholder: "Username", text: $username)
-
-                        inputField(icon: "lock.fill", placeholder: "Password", isSecure: true, text: $password)
+                        SFTextField(placeholder: "Username", icon: "person.fill", text: $username)
+                        SFTextField(placeholder: "Password", icon: "lock.fill", text: $password, isSecure: true)
 
                         // MARK: - Stay Logged In
                         Toggle(isOn: $stayLoggedIn) {
@@ -107,27 +105,6 @@ struct LoginView: View {
                 Spacer()
             }
         }
-    }
-
-    // MARK: - Custom Input Field
-    @ViewBuilder
-    func inputField(icon: String, placeholder: String, isSecure: Bool = false, text: Binding<String>) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.white.opacity(0.7))
-
-            if isSecure {
-                SecureField(placeholder, text: text)
-                    .foregroundColor(.white)
-            } else {
-                TextField(placeholder, text: text)
-                    .foregroundColor(.white)
-                    .textInputAutocapitalization(.never)
-            }
-        }
-        .padding()
-        .background(Color.white.opacity(0.15))
-        .cornerRadius(10)
     }
 
     // MARK: - Login Logic

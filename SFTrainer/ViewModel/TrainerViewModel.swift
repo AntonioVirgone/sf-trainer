@@ -15,6 +15,10 @@ class TrainerViewModel: ObservableObject {
     
     private let api = ApiService()
 
+    init() {
+        loadTrainer()
+    }
+    
     // MARK: LOCAL OPERATION
     func saveTrainer() {
         guard let trainer else {

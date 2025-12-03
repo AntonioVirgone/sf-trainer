@@ -16,6 +16,7 @@ struct CustomersDashboardView: View {
     @State private var showAssignWorkout = false
     
     @StateObject var vm = CustomersViewModel()
+    @EnvironmentObject var tvm: TrainerViewModel
 
     var body: some View {
         NavigationStack {
@@ -43,7 +44,9 @@ struct CustomersDashboardView: View {
                 }
             }
             .navigationTitle("Gestione Clienti")
-            .task { await vm.loadCustomers(trainerCode: "aabb") }
+            .task {
+                await loadCustomers()
+            }
         }
     }
     
@@ -166,12 +169,13 @@ struct CustomersDashboardView: View {
         }
     }
 
-    /*
-    func loadCustomers() {
-        // TODO: API NestJS GET /customers
-        customers = CustomerLocalService.shared.getAll()
+    func loadCustomers() async {
+        print("loadCustomers")
+        if let trainer = tvm.trainer {
+            print("trainer: \(trainer)")
+            await vm.loadCustomers(trainerCode: trainer.id!)
+        }
     }
-    */
     
     func loadAssignedWorkouts(for customer: Customer) {
         let ids = AssignedWorkoutLocalStore.shared.getAssignedWorkouts(for: customer.id)

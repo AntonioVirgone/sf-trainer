@@ -41,18 +41,9 @@ struct SignUpView: View {
 
                     // MARK: Fields
                     VStack(spacing: 20) {
-                        inputField(icon: "person.fill",
-                                   placeholder: "Username",
-                                   text: $newUsername)
-
-                        inputField(icon: "envelope.fill",
-                                   placeholder: "Email",
-                                   text: $newMail)
-
-                        inputField(icon: "lock.fill",
-                                   placeholder: "Password",
-                                   isSecure: true,
-                                   text: $newPassword)
+                        SFTextField(placeholder: "Username", icon: "person.fill", text: $newUsername)
+                        SFTextField(placeholder: "Email", icon: "envelope.fill", text: $newMail)
+                        SFTextField(placeholder: "Password", icon: "lock.fill", text: $newPassword, isSecure: true)
                     }
                     .padding(.horizontal, 60)
 
@@ -114,30 +105,6 @@ struct SignUpView: View {
         } message: {
             Text(errorMessage ?? "Si è verificato un errore.")
         }
-    }
-
-    // MARK: Input field riutilizzabile
-    @ViewBuilder
-    func inputField(icon: String,
-                    placeholder: String,
-                    isSecure: Bool = false,
-                    text: Binding<String>) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.white.opacity(0.7))
-
-            if isSecure {
-                SecureField(placeholder, text: text)
-                    .foregroundColor(.white)
-            } else {
-                TextField(placeholder, text: text)
-                    .foregroundColor(.white)
-                    .textInputAutocapitalization(.never)
-            }
-        }
-        .padding()
-        .background(Color.white.opacity(0.15))
-        .cornerRadius(10)
     }
 
     // MARK: - Signup Logic
