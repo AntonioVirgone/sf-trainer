@@ -31,12 +31,6 @@ class CustomerApiService {
     }
 }
 
-struct Customer: Identifiable, Codable, Hashable {
-    let id: String
-    let name: String
-    let email: String?
-}
-
 struct CustomerWorkout: Codable, Hashable {
     let name: String
     let planNames: [String]

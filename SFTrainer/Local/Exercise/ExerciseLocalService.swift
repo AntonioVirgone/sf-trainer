@@ -13,15 +13,13 @@ class ExerciseLocalService {
     private init() {}
     
     func create(_ exercise: Exercise) {
-        var list = LocalDatabase.shared.exercises
+        var list = ExerciseLocalDatabase.shared.exercises
         list.append(exercise)
-        LocalDatabase.shared.exercises = list
+        ExerciseLocalDatabase.shared.exercises = list
     }
     
     func getAll() -> [Exercise] {
-        let ex = LocalDatabase.shared.exercises
-        print(ex)
-        return ex
+        ExerciseLocalDatabase.shared.exercises
     }
 }
 
@@ -37,17 +35,17 @@ class PlanLocalService {
             exercises: exercises
         )
         
-        var list = LocalDatabase.shared.plans
+        var list = ExerciseLocalDatabase.shared.plans
         list.append(plan)
-        LocalDatabase.shared.plans = list
+        ExerciseLocalDatabase.shared.plans = list
     }
     
     func getAll() -> [Plan] {
-        LocalDatabase.shared.plans
+        ExerciseLocalDatabase.shared.plans
     }
     
     func get(by id: String) -> Plan? {
-        LocalDatabase.shared.plans.first(where: { $0.id == id })
+        ExerciseLocalDatabase.shared.plans.first(where: { $0.id == id })
     }
 }
 
@@ -63,16 +61,16 @@ class WorkoutLocalService {
             planIds: planIds
         )
         
-        var list = LocalDatabase.shared.workouts
+        var list = ExerciseLocalDatabase.shared.workouts
         list.append(workout)
-        LocalDatabase.shared.workouts = list
+        ExerciseLocalDatabase.shared.workouts = list
     }
     
     func getAll() -> [Workout] {
-        LocalDatabase.shared.workouts
+        ExerciseLocalDatabase.shared.workouts
     }
     
     func get(by id: String) -> Workout? {
-        LocalDatabase.shared.workouts.first(where: { $0.id == id })
+        ExerciseLocalDatabase.shared.workouts.first(where: { $0.id == id })
     }
 }

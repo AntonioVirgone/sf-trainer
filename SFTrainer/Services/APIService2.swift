@@ -8,8 +8,8 @@
 import Foundation
 internal import Combine
 
-class APIService {
-    static let shared = APIService()
+class APIService2 {
+    static let shared = APIService2()
     private init() {}
     
     private let baseURL = URL(string: "https://smart-fit-api.onrender.com/api")!

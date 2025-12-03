@@ -24,12 +24,7 @@ struct TrainerMainView: View {
                         Label("Clienti", systemImage: "person.3.fill")
                     }
                 
-                AssignWorkoutView()
-                    .tabItem {
-                        Label("Assegna", systemImage: "link")
-                    }
-                
-                CustomerDashboardView()
+                CustomersDashboardView()
                     .tabItem {
                         Label("Dashboard", systemImage: "person.text.rectangle")
                     }

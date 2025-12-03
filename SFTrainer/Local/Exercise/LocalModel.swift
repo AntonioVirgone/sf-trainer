@@ -13,7 +13,7 @@ struct Exercise: Identifiable, Codable, Hashable {
     var name: String
     var description: String
     var imageName: String
-    var muscleGroup: String
+    var muscleGroup: MuscleGroupType
     var sets: Int
     var repetitions: Int
     var recovery: Int
@@ -24,7 +24,7 @@ struct Exercise: Identifiable, Codable, Hashable {
         name: String,
         description: String,
         imageName: String,
-        muscleGroup: String,
+        muscleGroup: MuscleGroupType,
         sets: Int,
         repetitions: Int,
         recovery: Int,
@@ -40,6 +40,17 @@ struct Exercise: Identifiable, Codable, Hashable {
         self.recovery = recovery
         self.instructions = instructions
     }
+}
+
+enum MuscleGroupType: String, CaseIterable, Codable, Identifiable {
+    case petto = "Petto"
+    case schiena = "Schiena"
+    case spalle = "Spalle"
+    case gambe = "Gambe"
+    case braccia = "Braccia"
+    case core = "Core"
+
+    var id: String { self.rawValue }
 }
 
 struct Plan: Identifiable, Codable, Hashable {

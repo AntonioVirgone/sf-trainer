@@ -7,15 +7,13 @@
 
 import Foundation
 
-class LocalDatabase {
-    static let shared = LocalDatabase()
+class CustomerLocalDatabase {
+    static let shared = CustomerLocalDatabase()
     
-    private let key = "smartfit_local_db"
+    private let key = "customer_local_db"
     
     struct DBModel: Codable {
-        var exercises: [Exercise] = []
-        var plans: [Plan] = []
-        var workouts: [Workout] = []
+        var customers: [Customer] = []
     }
     
     private init() {
@@ -40,18 +38,8 @@ class LocalDatabase {
     }
     
     // MARK: Accessors
-    var exercises: [Exercise] {
-        get { db.exercises }
-        set { db.exercises = newValue; save() }
-    }
-    
-    var plans: [Plan] {
-        get { db.plans }
-        set { db.plans = newValue; save() }
-    }
-    
-    var workouts: [Workout] {
-        get { db.workouts }
-        set { db.workouts = newValue; save() }
+    var customers: [Customer] {
+        get { db.customers }
+        set { db.customers = newValue; save() }
     }
 }

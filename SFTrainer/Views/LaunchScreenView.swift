@@ -12,7 +12,9 @@ struct LaunchScreenView: View {
     @State private var isActive = false
     @State private var size = 0.8
     @State private var opacity = 0.5
-    
+
+    private let pingService = ApiService()
+
     var body: some View {
         if isActive {
             // Qui va la tua vista principale
@@ -58,8 +60,28 @@ struct LaunchScreenView: View {
                     }
                 }
             }
+            .task {
+                await wakeServerAndStart()
+            }
         }
     }
+    
+    /// Attende IN PARALLELO sia l'animazione che la chiamata API
+        private func wakeServerAndStart() async {
+            async let wakeCall: () = pingService.wakeServer()
+            async let animationDelay: () = delayForAnimation()
+
+            _ = await (wakeCall, animationDelay)
+
+            withAnimation {
+                isActive = true
+            }
+        }
+
+        /// Questo attende che l’animazione della launch duri un minimo di 2 secondi
+        private func delayForAnimation() async {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+        }
 }
 
 #Preview {
