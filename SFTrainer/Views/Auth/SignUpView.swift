@@ -9,99 +9,162 @@ import Foundation
 import SwiftUI
 
 struct SignUpView: View {
-    @EnvironmentObject var apiService: UserApiService
+    @EnvironmentObject var vm: TrainerViewModel
 
     @Binding var showRegister: Bool
 
-    @State private var onClickRequest = false
-
-    @State private var username: String = ""
-    @State private var password: String = ""
     @State private var newUsername: String = ""
     @State private var newPassword: String = ""
     @State private var newMail: String = ""
 
-    var body: some View {
-        VStack {
-            VStack {
-                // MARK: - Logo
-                logo.padding(.top, 20)
+    @State private var loading = false
+    @State private var errorMessage: String?
 
-                // MARK: - Create new account
-                VStack {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "person.fill")
-                            TextField("Username", text: $newUsername)
-                                .textInputAutocapitalization(.never)
-                        }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                        HStack {
-                            Image(systemName: "envelope.fill")
-                            TextField("Mail", text: $newMail)
-                        }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                        HStack {
-                            Image(systemName: "lock")
-                            SecureField("Password", text: $newPassword)
-                        }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
+    var body: some View {
+        ZStack {
+            backgroundGradient.ignoresSafeArea()
+
+            VStack {
+                Spacer()
+
+                // MARK: - Card principale
+                VStack(spacing: 32) {
+
+                    // MARK: Logo
+                    logo
+                        .padding(.top, 20)
+
+                    // MARK: Titolo
+                    Text("Crea un nuovo account")
+                        .font(.largeTitle.bold())
+                        .foregroundColor(.white)
+
+                    // MARK: Fields
+                    VStack(spacing: 20) {
+                        inputField(icon: "person.fill",
+                                   placeholder: "Username",
+                                   text: $newUsername)
+
+                        inputField(icon: "envelope.fill",
+                                   placeholder: "Email",
+                                   text: $newMail)
+
+                        inputField(icon: "lock.fill",
+                                   placeholder: "Password",
+                                   isSecure: true,
+                                   text: $newPassword)
                     }
-                    .padding(.vertical, 4)
-                }
-                .padding(.horizontal)
-                
-                // MARK: - Separator
-                separator(circleColor: secundaryColor, isLoading: false)
-                    .padding(.vertical, 10)
-                
-                // MARK: Create new account
-                signupButton
-                    .padding(.bottom, 20)
-            }
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(secundaryColor, lineWidth: 1)   // 👈 Cornice sottile
-            )
-            .padding(20)
-            
-            Button(action: {
-                showRegister = false   // 👈 Torna indietro senza registrarsi
-            }) {
-                Text("Torna al Login")
-                    .font(.headline)
-                    .foregroundColor(.black)
-                    .padding()
-                    .frame(maxWidth: .infinity)     // 🔥 prende tutta la larghezza possibile
-                    .background(secundaryColor)
-                    .cornerRadius(10)
-            }
-            .padding([.leading, .trailing], 35)        }
-    }
-    
-    private var signupButton: some View {
-        VStack {
-            Button(action: {
-                self.onClickRequest = true
-                // apiService.signUp(user: User(username: username, password: password, email: newMail))
-            }) {
-                Text("Create new account")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)     // 🔥 prende tutta la larghezza possibile
+                    .padding(.horizontal, 60)
+
+                    // MARK: pulsante di registrazione
+                    Button {
+                        Task { await performSignUp() }
+                    } label: {
+                        if loading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            Text("Crea account")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
                     .background(primryColor)
-                    .cornerRadius(10)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 60)
+
+                    // MARK: Separator
+                    separator(circleColor: primryColor, isLoading: loading)
+                        .padding(.vertical, 8)
+
+                    // MARK: Torna al login
+                    Button(action: { showRegister = false }) {
+                        Text("Torna al Login")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                    }
+                    .background(secundaryColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 60)
+
+                }
+                .frame(maxWidth: 600)
+                .padding()
+                .background(Color.black.opacity(0.25))
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(secundaryColor.opacity(0.5), lineWidth: 1)
+                )
+
+                Spacer()
             }
-            .padding(.horizontal)               // 🔥 margine dai bordi
-            .disabled(false)            
+        }
+        .alert("Errore", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { _ in errorMessage = nil })
+        ) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "Si è verificato un errore.")
         }
     }
-    
+
+    // MARK: Input field riutilizzabile
+    @ViewBuilder
+    func inputField(icon: String,
+                    placeholder: String,
+                    isSecure: Bool = false,
+                    text: Binding<String>) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(.white.opacity(0.7))
+
+            if isSecure {
+                SecureField(placeholder, text: text)
+                    .foregroundColor(.white)
+            } else {
+                TextField(placeholder, text: text)
+                    .foregroundColor(.white)
+                    .textInputAutocapitalization(.never)
+            }
+        }
+        .padding()
+        .background(Color.white.opacity(0.15))
+        .cornerRadius(10)
+    }
+
+    // MARK: - Signup Logic
+    private func performSignUp() async {
+        loading = true
+        defer { loading = false }
+
+        guard !newUsername.isEmpty,
+              !newMail.isEmpty,
+              !newPassword.isEmpty else {
+            errorMessage = "Tutti i campi sono obbligatori."
+            return
+        }
+
+        do {
+            try await vm.createTrainer(
+                name: newUsername,
+                email: newMail,
+                password: newPassword
+            )
+
+            // Torna al login dopo la creazione
+            showRegister = false
+
+        } catch {
+            errorMessage = "Errore durante la registrazione. Riprova."
+            print("Signup error:", error)
+        }
+    }
 }

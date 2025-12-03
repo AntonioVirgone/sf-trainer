@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct SmartFitTrainerApp: App {
+    init() {
+        UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+    }
+    
     var body: some Scene {
         WindowGroup {
             LaunchScreenView()
@@ -26,7 +30,7 @@ struct SmartFitTrainerApp: App {
     private func configureNavigationBarAppearance() {
         // Personalizzazione globale dell'app (aggiungeremo dopo)
         print("🎨 Configurazione stile della Navigation Bar...")
-
+        
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground() // ✅ rende la barra trasparente
         

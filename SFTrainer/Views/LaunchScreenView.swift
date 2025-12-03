@@ -67,21 +67,21 @@ struct LaunchScreenView: View {
     }
     
     /// Attende IN PARALLELO sia l'animazione che la chiamata API
-        private func wakeServerAndStart() async {
-            async let wakeCall: () = pingService.wakeServer()
-            async let animationDelay: () = delayForAnimation()
+    private func wakeServerAndStart() async {
+        async let wakeCall: () = pingService.wakeServer()
+        async let animationDelay: () = delayForAnimation()
 
-            _ = await (wakeCall, animationDelay)
+        _ = await (wakeCall, animationDelay)
 
-            withAnimation {
-                isActive = true
-            }
+        withAnimation {
+            isActive = true
         }
+    }
 
-        /// Questo attende che l’animazione della launch duri un minimo di 2 secondi
-        private func delayForAnimation() async {
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-        }
+    /// Questo attende che l’animazione della launch duri un minimo di 2 secondi
+    private func delayForAnimation() async {
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+    }
 }
 
 #Preview {

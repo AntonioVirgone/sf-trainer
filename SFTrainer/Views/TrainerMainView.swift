@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct TrainerMainView: View {
+    @EnvironmentObject var vm: TrainerViewModel
     @EnvironmentObject var auth: UserApiService   // se già lo usi
     
     var body: some View {
@@ -27,6 +28,10 @@ struct TrainerMainView: View {
                 CustomersDashboardView()
                     .tabItem {
                         Label("Dashboard", systemImage: "person.text.rectangle")
+                    }
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape")
                     }
             }
             // colore di selezione tab

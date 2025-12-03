@@ -8,7 +8,8 @@
 import Foundation
 
 class ApiService {
-    private let baseUrl = "https://smart-fit-api.onrender.com/api"
+//    private let baseUrl = "https://smart-fit-api.onrender.com/api"
+    private let baseUrl = "https://aa17a4be0a8c.ngrok-free.app/api"
 
     // MARK: -------- GENERIC GET --------
     func get<T: Decodable>(_ path: String) async throws -> T {
@@ -26,6 +27,8 @@ class ApiService {
         request.httpBody = try JSONEncoder().encode(body)
 
         let (data, _) = try await URLSession.shared.data(for: request)
+        print("RAW RESPONSE: ", String(data: data, encoding: .utf8)!)
+
         return try JSONDecoder().decode(T.self, from: data)
     }
 

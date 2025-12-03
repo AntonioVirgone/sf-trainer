@@ -9,103 +9,145 @@ import Foundation
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject var apiService: UserApiService
-    
-    @Binding var showRegister: Bool
-    
-    @State private var onClickRequest = false
-    
+    @EnvironmentObject var vm: TrainerViewModel
+
     @State private var username: String = ""
     @State private var password: String = ""
-    
+    @State private var stayLoggedIn: Bool = UserDefaults.standard.bool(forKey: "stayLoggedIn")
+
     @State private var loading = false
-    @State private var errorMessage = ""
-    
-    @State private var size = 0.8
-    @State private var opacity = 0.5
-    
+    @Binding var showRegister: Bool
+
     var body: some View {
-        VStack {
+        ZStack {
+            backgroundGradient.ignoresSafeArea()
+
             VStack {
-                // MARK: - Logo
-                logo.padding(.top, 20)
-                
-                // MARK: - TextEdit per inserire username e password
-                VStack {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "person.fill")
-                            TextField("Username", text: $username)
-                                .textInputAutocapitalization(.never)
+                Spacer()
+
+                // MARK: - Centro (Card)
+                VStack(spacing: 32) {
+
+                    // MARK: - Logo
+                    logo
+                        .padding(.top, 20)
+
+                    // MARK: - Titolo App
+                    Text("Accedi al tuo account")
+                        .font(.largeTitle.bold())
+                        .foregroundColor(.white)
+
+                    // MARK: - Campi input
+                    VStack(spacing: 20) {
+
+                        inputField(icon: "person.fill", placeholder: "Username", text: $username)
+
+                        inputField(icon: "lock.fill", placeholder: "Password", isSecure: true, text: $password)
+
+                        // MARK: - Stay Logged In
+                        Toggle(isOn: $stayLoggedIn) {
+                            Text("Rimani connesso")
+                                .foregroundColor(.white)
                         }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                        HStack {
-                            Image(systemName: "lock")
-                            SecureField("Password", text: $password)
-                        }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
+                        .toggleStyle(SwitchToggleStyle(tint: primryColor))
                     }
-                    .padding(.vertical, 4)
-                }
-                .padding(.horizontal)
-                
-                // MARK: - Separator
-                separator(circleColor: primryColor, isLoading: loading)
-                    .padding(.vertical, 10)
-                
-                // MARK: - Login button
-                loginButton
-                    .padding(.bottom, 20)
-            }
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(primryColor, lineWidth: 1)   // 👈 Cornice sottile
-            )
-            .padding(20)
-            
-            Button(action: {
-                showRegister = true   // 👈 Passa alla schermata di registrazione
-            }) {
-                Text("Registrati")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)     // 🔥 prende tutta la larghezza possibile
+                    .padding(.horizontal, 60)
+
+                    // MARK: - Login Button
+                    Button {
+                        Task {
+                            await performLogin()
+                        }
+                    } label: {
+                        if loading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            Text("Accedi")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
                     .background(primryColor)
-                    .cornerRadius(10)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 60)
+
+                    // MARK: - Separator
+                    separator(circleColor: primryColor, isLoading: loading)
+                        .padding(.vertical, 8)
+
+                    // MARK: - Register
+                    Button(action: {
+                        showRegister = true
+                    }) {
+                        Text("Crea un nuovo account")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                    }
+                    .background(secundaryColor)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 60)
+
+                }
+                .frame(maxWidth: 600)  // 🔥 Perfetto per iPad
+                .padding()
+                .background(Color.black.opacity(0.25))
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(primryColor.opacity(0.5), lineWidth: 1)
+                )
+
+                Spacer()
             }
-            .padding([.leading, .trailing], 35)
-            
         }
     }
-    
-    private var loginButton: some View {
-        VStack {
-            Button{
-                Task {
-                    loading = true
-                    let ok = await apiService.login(username: username, password: password)
-                    loading = false
-                    
-                    if !ok {
-                        errorMessage = "Credenziali non valide"
-                    }
-                }
-            } label: {
-                Text("Login")
-                    .font(.headline)
-                    .foregroundColor(.black)
-                    .padding()
-                    .frame(maxWidth: .infinity)     // 🔥 prende tutta la larghezza possibile
-                    .background(secundaryColor)
-                    .cornerRadius(10)
+
+    // MARK: - Custom Input Field
+    @ViewBuilder
+    func inputField(icon: String, placeholder: String, isSecure: Bool = false, text: Binding<String>) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(.white.opacity(0.7))
+
+            if isSecure {
+                SecureField(placeholder, text: text)
+                    .foregroundColor(.white)
+            } else {
+                TextField(placeholder, text: text)
+                    .foregroundColor(.white)
+                    .textInputAutocapitalization(.never)
             }
-            .padding(.horizontal)               // 🔥 margine dai bordi
-            .disabled(loading)
+        }
+        .padding()
+        .background(Color.white.opacity(0.15))
+        .cornerRadius(10)
+    }
+
+    // MARK: - Login Logic
+    private func performLogin() async {
+        loading = true
+        defer { loading = false }
+
+        do {
+            try await vm.loginTrainer(name: username, password: password)
+
+            // SALVA LA PREFERENZA per la prossima apertura
+            UserDefaults.standard.set(stayLoggedIn, forKey: "stayLoggedIn")
+
+            if stayLoggedIn {
+                UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                self.vm.saveTrainer()
+            }
+
+        } catch {
+            print("Errore login:", error)
         }
     }
 }

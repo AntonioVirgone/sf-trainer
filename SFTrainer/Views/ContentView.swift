@@ -13,8 +13,8 @@ struct ContentView: View {
     private let dataOrigin = "REMOTE"
     
     // MARK: - Environment Objects
-    @StateObject private var userApiService = UserApiService()
-    
+    @StateObject var vm = TrainerViewModel()
+
     @State private var showingMenu = false
     
     var isLogged: Bool {
@@ -26,13 +26,13 @@ struct ContentView: View {
             // 🔹 Sfondo gradiente
             backgroundGradient
             
-//            if userApiService.isLoggedIn {
-            TrainerMainView()
-                    .environmentObject(userApiService)
-//            } else {
-//                AuthView()
-//                    .environmentObject(userApiService)
-//            }
+            if isLogged || vm.trainer != nil {
+                TrainerMainView()
+                    .environmentObject(vm)
+            } else {
+                AuthView()
+                    .environmentObject(vm)
+            }
         }
     }
 }

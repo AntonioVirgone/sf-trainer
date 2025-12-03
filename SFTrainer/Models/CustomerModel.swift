@@ -12,3 +12,16 @@ struct Customer: Identifiable, Codable, Hashable {
     let name: String
     let email: String?
 }
+
+struct CustomerWorkout: Codable, Hashable {
+    let name: String
+    let planNames: [String]
+}
+
+struct ExerciseHistoryEntry: Identifiable, Codable, Hashable {
+    let id: String
+    let date: String
+    let exerciseName: String
+    let reps: Int
+    let sets: Int
+}
