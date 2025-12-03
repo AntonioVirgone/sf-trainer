@@ -10,13 +10,16 @@ import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject var apiService: UserApiService
-
+    
     @Binding var showRegister: Bool
-
+    
     @State private var onClickRequest = false
     
     @State private var username: String = ""
     @State private var password: String = ""
+    
+    @State private var loading = false
+    @State private var errorMessage = ""
     
     @State private var size = 0.8
     @State private var opacity = 0.5
@@ -33,6 +36,7 @@ struct LoginView: View {
                         HStack {
                             Image(systemName: "person.fill")
                             TextField("Username", text: $username)
+                                .textInputAutocapitalization(.never)
                         }
                         .padding()
                         .background(Color(.secondarySystemBackground))
@@ -50,7 +54,7 @@ struct LoginView: View {
                 .padding(.horizontal)
                 
                 // MARK: - Separator
-                separator(circleColor: primryColor, isLoading: apiService.isLoading)
+                separator(circleColor: primryColor, isLoading: loading)
                     .padding(.vertical, 10)
                 
                 // MARK: - Login button
@@ -62,7 +66,7 @@ struct LoginView: View {
                     .stroke(primryColor, lineWidth: 1)   // 👈 Cornice sottile
             )
             .padding(20)
-
+            
             Button(action: {
                 showRegister = true   // 👈 Passa alla schermata di registrazione
             }) {
@@ -75,16 +79,23 @@ struct LoginView: View {
                     .cornerRadius(10)
             }
             .padding([.leading, .trailing], 35)
-
+            
         }
     }
     
     private var loginButton: some View {
         VStack {
-            Button(action: {
-                self.onClickRequest = true
-                apiService.login(user: User(username: username, password: password))
-            }) {
+            Button{
+                Task {
+                    loading = true
+                    let ok = await apiService.login(username: username, password: password)
+                    loading = false
+                    
+                    if !ok {
+                        errorMessage = "Credenziali non valide"
+                    }
+                }
+            } label: {
                 Text("Login")
                     .font(.headline)
                     .foregroundColor(.black)
@@ -94,20 +105,7 @@ struct LoginView: View {
                     .cornerRadius(10)
             }
             .padding(.horizontal)               // 🔥 margine dai bordi
-            .disabled(apiService.isLoading)
-            
-            if let error = apiService.errorMessage {
-                if apiService.isError {
-                    Text("Errore: \(error)")
-                        .foregroundColor(.red)
-                }
-            }
-            
-            if self.onClickRequest && !apiService.isLoading && !apiService.isError {
-                Text("Login effettuato con successo!")
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundColor(.white)
-            }
+            .disabled(loading)
         }
     }
 }
